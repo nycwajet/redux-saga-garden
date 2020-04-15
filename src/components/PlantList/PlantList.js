@@ -8,9 +8,15 @@ const mapStateToProps = reduxState => ({
 class PlantList extends Component {
     componentDidMount() {
         // use component did mount to dispatch an action to request the plantList from the API
-        getPlants = () =>{
-            this.props.dipatch({type:'FETCH_PLANTS'});
-        }
+       this.getPlants();
+    }
+
+    getPlants = () =>{
+        this.props.dispatch({type:'FETCH_PLANTS'});
+    }
+
+    deletePlant = (id)=>{
+        this.props.dispatch({type:'DELETE_PLANT', payload: id});
     }
 
     render() {
@@ -18,9 +24,17 @@ class PlantList extends Component {
             <div>
                 <h3>This is the plant list</h3>
                 <pre>{JSON.stringify(this.props.reduxState)}</pre>
+                { <ul>
+                    {this.props.reduxState.plantList.map((plantItem)=> {
+                        return(
+                            <li key={plantItem.id}>{plantItem.name}
+                            <button onClick={()=>this.deletePlant (plantItem.id)}>Delete</button></li>
+                        )})}
+                </ul> }
             </div>
         );
     }
 }
+
 
 export default connect(mapStateToProps)(PlantList);

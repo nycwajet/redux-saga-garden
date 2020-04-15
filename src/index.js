@@ -10,24 +10,40 @@ import axios from 'axios';
 import App from './App';
 
 // this startingPlantArray should eventually be removed
-const startingPlantArray = [
-  { id: 1, name: 'Rose' },
-  { id: 2, name: 'Tulip' },
-  { id: 3, name: 'Oak' }
-];
+
+function* deletePlantSaga(action){
+  try {
+    console.log('deleting', action.payload)
+    yield axios.delete('/api/plant/' + action.payload)
+    yield put({ type: 'FETCH_PLANTS'})
+  }
+  catch(error) {
+    console.log(`error deleting`, error)
+  }
+}
+
+function* addPlantSaga(action){
+  try{
+    console.log('in addPlantSaga');
+    yield axios.post('/api/plant', action.payload)
+    yield put({type:'FETCH_PLANTS'})
+  }catch(error){
+    console.log('error in post', error);
+  }
+}
 
 function* getPlantSaga(action){
   try{
     const response = yield axios.get('/api/plant')
     yield put({type:'SET_PLANT', payload:response.data})
   }catch{
-    console.log('errro in getPlantsaga')
+    console.log('errro in getPlantsaga');
   }
 }
 
-const plantList = (state = startingPlantArray, action) => {
+const plantList = (state = [], action) => {
   switch (action.type) {
-    case 'ADD_PLANT':
+    case 'SET_PLANT':
       return [ ...state, action.payload ]
     default:
       return state;
@@ -36,14 +52,15 @@ const plantList = (state = startingPlantArray, action) => {
 
 function* watcherSaga() {
     yield takeEvery('FETCH_PLANTS', getPlantSaga);
-  
+  yield takeEvery('ADD_PLANT', addPlantSaga);
+  yield takeEvery('DELETE_PLANT', deletePlantSaga);
 }
 
 const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore(
   combineReducers({ plantList }),
-  applyMiddleware(sagaMiddleware, logger);
+  applyMiddleware(sagaMiddleware, logger)
 );
 
 sagaMiddleware.run(watcherSaga);
