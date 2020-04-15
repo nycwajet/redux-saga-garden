@@ -44,7 +44,7 @@ function* getPlantSaga(action){
 const plantList = (state = [], action) => {
   switch (action.type) {
     case 'SET_PLANT':
-      return [ ...state, action.payload ]
+      return action.payload
     default:
       return state;
   }
